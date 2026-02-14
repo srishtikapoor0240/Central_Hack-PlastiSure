@@ -23,6 +23,6 @@ def get_recommendation(score):
     if score >= 0.75:
         return "Accepted"
     elif score >= 0.4:
-        return "Manual Review"
+        return "Needs cleaning"
     else:
         return "Rejected"
