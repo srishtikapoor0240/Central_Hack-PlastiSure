@@ -27,9 +27,13 @@ def register_routes(app):
             })
 
             block = create_block(service_result)
+            display_label=service_result["plastic_type"]
+            if display_label=="LDPA":
+                display_label="LDPE"
+            print("DEBUG SCORE:", service_result["recyclability_score"])
 
             return jsonify({
-                "plastic_type": service_result["plastic_type"],
+                "plastic_type": display_label,
                 "contamination": service_result["contamination"],
                 "cleanliness_factor": service_result["cleanliness_factor"],
                 "recyclability_score": service_result["recyclability_score"],
