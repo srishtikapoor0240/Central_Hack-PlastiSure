@@ -5,6 +5,10 @@ from services.recyclability_service import evaluate_recyclability
 from services.blockchain_service import create_block, verify_chain_integrity
 
 def register_routes(app):
+    @app.route("/health", methods=["GET"])
+    def health():
+        return jsonify({"status": "ok"}), 200
+
 
     @app.route("/analyze", methods=["POST"])
     def analyze():

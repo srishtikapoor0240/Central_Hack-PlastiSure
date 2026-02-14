@@ -7,7 +7,7 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-    BACKEND_URL: 'http://127.0.0.1:5000/analyze',
+    BACKEND_URL: '/analyze',
     CAPTURE_INTERVAL: 2000, // 2 seconds
     FRAME_SIZE: 224,
     HASH_DISPLAY_LENGTH: 16
@@ -26,51 +26,53 @@ let statistics = {
     recyclableItems: 0,
     totalScore: 0
 };
+let elements = {};
 
 // ==========================================
 // DOM ELEMENTS
 // ==========================================
-const elements = {
-    video: document.getElementById('video'),
-    canvas: document.getElementById('canvas'),
-    startBtn: document.getElementById('startBtn'),
-    stopBtn: document.getElementById('stopBtn'),
-    resultCard: document.getElementById('resultCard'),
-    plasticType: document.getElementById('plasticType'),
-    contamination: document.getElementById('contamination'),
-    contaminationProgress: document.getElementById('contaminationProgress'),
-    score: document.getElementById('score'),
-    scoreProgress: document.getElementById('scoreProgress'),
-    hash: document.getElementById('hash'),
-    timestamp: document.getElementById('timestamp'),
-    statusBadge: document.getElementById('statusBadge'),
-    statusIcon: document.getElementById('statusIcon'),
-    statusText: document.getElementById('statusText'),
-    recommendation: document.getElementById('recommendation'),
-    recommendationText: document.getElementById('recommendationText'),
-    scanningOverlay: document.getElementById('scanningOverlay'),
-    auditLogBtn: document.getElementById('auditLogBtn'),
-    auditModal: document.getElementById('auditModal'),
-    closeModal: document.getElementById('closeModal'),
-    auditLogContent: document.getElementById('auditLogContent'),
-    exportLogBtn: document.getElementById('exportLogBtn'),
-    clearLogBtn: document.getElementById('clearLogBtn'),
-    connectionStatus: document.getElementById('connectionStatus'),
-    connectionText: document.getElementById('connectionText'),
-    totalScans: document.getElementById('totalScans'),
-    recyclableItems: document.getElementById('recyclableItems'),
-    avgScore: document.getElementById('avgScore')
-};
-
-// ==========================================
-// INITIALIZATION
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+
+    elements = {
+        video: document.getElementById('video'),
+        canvas: document.getElementById('canvas'),
+        startBtn: document.getElementById('startBtn'),
+        stopBtn: document.getElementById('stopBtn'),
+        resultCard: document.getElementById('resultCard'),
+        plasticType: document.getElementById('plasticType'),
+        contamination: document.getElementById('contamination'),
+        contaminationProgress: document.getElementById('contaminationProgress'),
+        score: document.getElementById('score'),
+        scoreProgress: document.getElementById('scoreProgress'),
+        hash: document.getElementById('hash'),
+        timestamp: document.getElementById('timestamp'),
+        statusBadge: document.getElementById('statusBadge'),
+        statusIcon: document.getElementById('statusIcon'),
+        statusText: document.getElementById('statusText'),
+        recommendation: document.getElementById('recommendation'),
+        recommendationText: document.getElementById('recommendationText'),
+        scanningOverlay: document.getElementById('scanningOverlay'),
+        auditLogBtn: document.getElementById('auditLogBtn'),
+        auditModal: document.getElementById('auditModal'),
+        closeModal: document.getElementById('closeModal'),
+        auditLogContent: document.getElementById('auditLogContent'),
+        exportLogBtn: document.getElementById('exportLogBtn'),
+        clearLogBtn: document.getElementById('clearLogBtn'),
+        connectionStatus: document.getElementById('connectionStatus'),
+        connectionText: document.getElementById('connectionText'),
+        totalScans: document.getElementById('totalScans'),
+        recyclableItems: document.getElementById('recyclableItems'),
+        avgScore: document.getElementById('avgScore')
+    };
+
     initializeApp();
     loadBlockchainHistory();
     loadStatistics();
     checkBackendConnection();
 });
+
+
+
 
 function initializeApp() {
     elements.startBtn.addEventListener('click', startCamera);
@@ -164,7 +166,6 @@ function captureFrame() {
 // ==========================================
 async function sendToBackend(imageData) {
     try {
-        updateConnectionStatus(true);
         
         const response = await fetch(CONFIG.BACKEND_URL, {
             method: 'POST',
@@ -187,13 +188,15 @@ async function sendToBackend(imageData) {
 
 async function checkBackendConnection() {
     try {
-        const response = await fetch("http://127.0.0.1:5000/");
+        const response = await fetch("/health", { cache: "no-store" });
         updateConnectionStatus(response.ok);
     } catch {
         updateConnectionStatus(false);
     }
-    setTimeout(checkBackendConnection, 10000);
+
+    setTimeout(checkBackendConnection, 5000); // check every 5 seconds
 }
+
 
 function updateConnectionStatus(isConnected) {
     if (isConnected) {
@@ -401,3 +404,37 @@ function getScoreColor(score) {
     if (score >= 40) return '#f59e0b';
     return '#ef4444';
 }
+function openAuditModal() {
+    elements.auditModal.style.display = "flex";
+}
+
+function closeAuditModal() {
+    elements.auditModal.style.display = "none";
+}
+
+function exportAuditLog() {
+    console.log("Exporting...");
+}
+
+function clearAuditLog() {
+    blockchainHistory = [];
+    renderAuditLog();
+}
+
+function loadBlockchainHistory() {
+    const saved = localStorage.getItem("plastisure_chain");
+    if (saved) blockchainHistory = JSON.parse(saved);
+}
+
+function saveBlockchainHistory() {
+    localStorage.setItem("plastisure_chain", JSON.stringify(blockchainHistory));
+}
+
+function saveStatistics() {
+    localStorage.setItem("plastisure_statistics", JSON.stringify(statistics));
+}
+
+function formatTimestamp(ts) {
+    return new Date(ts).toLocaleString();
+}
+
